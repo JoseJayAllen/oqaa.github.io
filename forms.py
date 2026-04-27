@@ -4,8 +4,8 @@ from wtforms import StringField, PasswordField, SelectField, EmailField, TextAre
 from wtforms.validators import DataRequired, Email, EqualTo, Length, Optional
 
 class LoginForm(FlaskForm):
-    email = EmailField('Email', validators=[DataRequired(), Email()])
-    password = PasswordField('Password', validators=[DataRequired()])
+    email = EmailField('Email')
+    password = PasswordField('Password',)
     remember_me = BooleanField('Remember Me')
 
 class RegisterForm(FlaskForm):
