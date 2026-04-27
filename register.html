@@ -264,18 +264,7 @@
           // Show pending notice instead of auto-login
           document.getElementById('registrationForm').style.display = 'none';
           document.getElementById('pendingNotice').style.display = 'block';
-        } else {
-          showToast('Error', data.message || 'Registration failed', 'danger');
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = '<i class="fas fa-user-plus me-2"></i>Create Account';
         }
-      } catch (error) {
-        console.error('Registration error:', error);
-        showToast('Error', 'Cannot connect to server. Please make sure the server is running.', 'danger');
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = '<i class="fas fa-user-plus me-2"></i>Create Account';
-      }
-    });
 
     // Check if already logged in
     document.addEventListener('DOMContentLoaded', async function() {
