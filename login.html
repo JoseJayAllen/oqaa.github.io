@@ -188,7 +188,23 @@
           setTimeout(() => {
             window.location.href = '/index.html';
           }, 800);
+        } else {
+          // Check for specific status messages
+          if (data.message && data.message.includes('pending approval')) {
+            showStatusMessage(data.message, 'pending');
+          } else if (data.message && data.message.includes('deactivated')) {
+            showStatusMessage(data.message, 'inactive');
+          } else {
+            showToast('Login Failed', data.message || 'Invalid credentials', 'danger');
+          }
+          loginBtn.disabled = false;
+          loginBtn.innerHTML = '<i class="fas fa-sign-in-alt me-2"></i>Sign In';
         }
+      } catch (err) {
+        console.error(err);
+        showToast('Error', 'Cannot connect to server. Please make sure the server is running.', 'danger');
+        loginBtn.disabled = false;
+        loginBtn.innerHTML = '<i class="fas fa-sign-in-alt me-2"></i>Sign In';
       }
     });
 
