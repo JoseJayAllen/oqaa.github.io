@@ -243,25 +243,21 @@ def serve_register():
 
 
 @app.route('/index.html')
-@login_required
 def serve_index():
     return send_from_directory(BASE_DIR, 'index.html')
 
 
 @app.route('/accounts.html')
-@login_required
 def serve_accounts():
     return send_from_directory(BASE_DIR, 'accounts.html')
 
 
 @app.route('/profile.html')
-@login_required
 def serve_profile():
     return send_from_directory(BASE_DIR, 'profile.html')
 
 
 @app.route('/history.html')
-@login_required
 def serve_history():
     return send_from_directory(BASE_DIR, 'history.html')
 
@@ -327,13 +323,11 @@ def api_register():
 
 
 @app.route('/api/auth/me')
-@login_required
 def api_current_user():
     return jsonify(current_user.to_dict())
 
 
 @app.route('/api/auth/logout', methods=['POST'])
-@login_required
 def api_logout():
     log_audit('LOGOUT', f'User {current_user.email} logged out')
     logout_user()
@@ -342,7 +336,6 @@ def api_logout():
 
 # ====================== PROFILE ======================
 @app.route('/api/profile', methods=['GET', 'PUT'])
-@login_required
 def api_profile():
     if request.method == 'GET':
         return jsonify(current_user.to_dict())
@@ -359,7 +352,6 @@ def api_profile():
 
 
 @app.route('/api/profile/password', methods=['PUT'])
-@login_required
 def api_change_password():
     data = request.get_json()
     if not current_user.check_password(data.get('current_password')):
@@ -375,7 +367,6 @@ def api_change_password():
 
 
 @app.route('/api/profile/avatar', methods=['POST'])
-@login_required
 def api_upload_avatar():
     if 'avatar' not in request.files:
         return jsonify({'success': False, 'message': 'No file provided'}), 400
@@ -405,7 +396,6 @@ def api_upload_avatar():
 
 # ====================== ACCOUNTS ======================
 @app.route('/api/accounts', methods=['GET', 'POST'])
-@login_required
 def api_accounts():
     if current_user.role != 'admin':
         return jsonify({'error': 'Permission denied'}), 403
@@ -437,7 +427,6 @@ def api_accounts():
 
 
 @app.route('/api/accounts/<int:user_id>', methods=['PUT', 'DELETE'])
-@login_required
 def api_account_detail(user_id):
     if current_user.role != 'admin':
         return jsonify({'error': 'Permission denied'}), 403
@@ -476,7 +465,6 @@ def api_account_detail(user_id):
 
 
 @app.route('/api/accounts/<int:user_id>/activate', methods=['POST'])
-@login_required
 def api_activate_account(user_id):
     """Activate a pending or inactive account"""
     if current_user.role != 'admin':
@@ -491,7 +479,6 @@ def api_activate_account(user_id):
 
 
 @app.route('/api/accounts/<int:user_id>/deactivate', methods=['POST'])
-@login_required
 def api_deactivate_account(user_id):
     """Deactivate an active account"""
     if current_user.role != 'admin':
@@ -510,7 +497,6 @@ def api_deactivate_account(user_id):
 
 # ====================== FILES ======================
 @app.route('/api/files', methods=['GET', 'POST'])
-@login_required
 def api_files():
     if request.method == 'GET':
         files = File.query.order_by(File.uploaded_at.desc()).all()
@@ -549,7 +535,6 @@ def api_files():
 
 
 @app.route('/api/files/<int:file_id>', methods=['DELETE'])
-@login_required
 def api_delete_file(file_id):
     file = File.query.get_or_404(file_id)
 
@@ -577,7 +562,6 @@ def api_delete_file(file_id):
 
 
 @app.route('/api/files/<int:file_id>/download')
-@login_required
 def api_download_file(file_id):
     file = File.query.get_or_404(file_id)
     if os.path.exists(file.file_path):
@@ -587,7 +571,6 @@ def api_download_file(file_id):
 
 
 @app.route('/api/files/<int:file_id>/preview')
-@login_required
 def api_preview_file(file_id):
     file = File.query.get_or_404(file_id)
     if os.path.exists(file.file_path):
@@ -597,7 +580,6 @@ def api_preview_file(file_id):
 
 # ====================== AUDIT TRAIL ======================
 @app.route('/api/audit-trail')
-@login_required
 def api_audit_trail():
     # Get query parameters for filtering
     date_range = request.args.get('date_range', 'all')
@@ -647,7 +629,6 @@ def api_audit_trail():
 
 
 @app.route('/api/audit-trail/stats')
-@login_required
 def api_audit_stats():
     today = datetime.now().date()
     week_ago = datetime.now() - timedelta(days=7)
@@ -674,7 +655,6 @@ def api_audit_stats():
 
 
 @app.route('/api/audit-trail/recent-logins')
-@login_required
 def api_recent_logins():
     """Recent logins available to all users"""
     recent_logins = AuditTrail.query.filter(
@@ -713,7 +693,6 @@ def get_relative_time(dt):
 
 # ====================== STATS ======================
 @app.route('/api/stats')
-@login_required
 def api_stats():
     total_files = File.query.count()
     total_users = User.query.filter_by(status='active').count()
@@ -732,7 +711,6 @@ def api_stats():
 
 
 @app.route('/api/accounts/stats')
-@login_required
 def api_accounts_stats():
     if current_user.role != 'admin':
         return jsonify({'error': 'Permission denied'}), 403
@@ -750,34 +728,6 @@ def api_accounts_stats():
         'pending_accounts': pending,
         'administrators': admins
     })
-
-
-# ====================== NOTIFICATIONS (PLACEHOLDER) ======================
-@app.route('/api/notifications')
-@login_required
-def api_notifications():
-    # Return empty array for now - can be expanded later
-    return jsonify([])
-
-
-@app.route('/api/notifications/unread-count')
-@login_required
-def api_notification_count():
-    return jsonify({'count': 0})
-
-
-@app.route('/api/messages')
-@login_required
-def api_messages():
-    # Return empty array for now - can be expanded later
-    return jsonify([])
-
-
-@app.route('/api/messages/unread-count')
-@login_required
-def api_message_count():
-    return jsonify({'count': 0})
-
 
 # ====================== INITIALIZATION ======================
 def create_default_data():
